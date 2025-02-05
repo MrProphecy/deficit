@@ -7,64 +7,98 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #111;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #ff00ff, #00ff00);
             text-align: center;
             color: white;
+            padding: 20px;
         }
         .container {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.8);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 0px 20px rgba(0, 255, 127, 0.8);
+            box-shadow: 0px 0px 20px rgba(255, 0, 255, 0.8);
             max-width: 500px;
             margin: auto;
         }
         h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3em;
+            font-size: 2.5em;
             color: #ff00ff;
             text-shadow: 0px 0px 10px #ff00ff, 0px 0px 20px #00ff00;
         }
-        p {
-            font-size: 18px;
-            color: #fff;
-        }
-        .download-button {
-            margin-top: 20px;
-            background: #ff00ff;
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
             border: none;
-            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .button {
+            background: #ff00ff;
+            color: white;
+            border: none;
+            padding: 10px;
             font-size: 18px;
             cursor: pointer;
-            color: white;
-            border-radius: 5px;
-            text-shadow: 0px 0px 5px #00ff00;
+            margin-top: 10px;
             transition: 0.3s;
         }
-        .download-button:hover {
+        .button:hover {
             background: #00ff00;
-            text-shadow: 0px 0px 10px #ff00ff;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Polgara</h1>
-        <p><strong>Tasa Metabólica Basal (TMB):</strong> 1607 kcal/día</p>
-        <p><strong>Gasto Energético Total Diario (TDEE):</strong> 2490 kcal/día</p>
-        <p><strong>Déficit del 10% (pérdida moderada):</strong> 2241 kcal/día</p>
-        <p><strong>Déficit del 20% (pérdida más agresiva):</strong> 1992 kcal/día</p>
-        <p>Para perder aproximadamente 0.5 kg de grasa por semana, el objetivo calórico es <strong>1990 kcal/día</strong>.</p>
-        <button class="download-button" onclick="downloadFile()">Descargar Datos</button>
+        <h1>Cálculo de Déficit Calórico</h1>
+        <input type="text" id="nombre" placeholder="Nombre">
+        <select id="sexo">
+            <option value="masculino">Masculino</option>
+            <option value="femenino">Femenino</option>
+        </select>
+        <input type="number" id="edad" placeholder="Edad">
+        <input type="number" id="peso" placeholder="Peso (kg)">
+        <input type="number" id="altura" placeholder="Altura (cm)">
+        <input type="email" id="correo" placeholder="Correo Electrónico">
+        <button class="button" onclick="calcularDeficit()">Calcular</button>
+        <div class="result" id="resultado"></div>
+        <button class="button" onclick="descargarDatos()">Descargar Datos</button>
     </div>
 
     <script>
-        function downloadFile() {
-            const data = `TMB: 1607 kcal/día\nTDEE: 2490 kcal/día\nDéficit 10%: 2241 kcal/día\nDéficit 20%: 1992 kcal/día\nObjetivo para perder 0.5kg/semana: 1990 kcal/día`;
-            const blob = new Blob([data], { type: 'text/plain' });
-            const link = document.createElement('a');
+        function calcularDeficit() {
+            let nombre = document.getElementById('nombre').value;
+            let sexo = document.getElementById('sexo').value;
+            let edad = parseInt(document.getElementById('edad').value);
+            let peso = parseFloat(document.getElementById('peso').value);
+            let altura = parseFloat(document.getElementById('altura').value);
+            
+            let tmb = (sexo === "masculino") ?
+                (10 * peso + 6.25 * altura - 5 * edad + 5) :
+                (10 * peso + 6.25 * altura - 5 * edad - 161);
+
+            let tdee = tmb * 1.55;  // Nivel de actividad moderado
+            let deficit_10 = tdee * 0.90;
+            let deficit_20 = tdee * 0.80;
+
+            document.getElementById('resultado').innerHTML = 
+                `<p><strong>${nombre}</strong>, tu cálculo es:</p>
+                <p>TMB: ${tmb.toFixed(2)} kcal/día</p>
+                <p>TDEE: ${tdee.toFixed(2)} kcal/día</p>
+                <p>Déficit 10%: ${deficit_10.toFixed(2)} kcal/día</p>
+                <p>Déficit 20%: ${deficit_20.toFixed(2)} kcal/día</p>`;
+        }
+
+        function descargarDatos() {
+            let datos = document.getElementById('resultado').innerText;
+            let blob = new Blob([datos], { type: 'text/plain' });
+            let link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'deficit_calorico.txt';
             document.body.appendChild(link);
